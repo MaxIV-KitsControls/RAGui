@@ -48,7 +48,7 @@ Getting started with WINDOWS:
         step 0: Start your Ubuntu, set a username and password
         step 1: sudo bash -c ' apt update -y && apt full-upgrade -y && apt-get install git libxkbcommon-x11-0 -y && export DISPLAY=localhost:0.0' 
         step 2: (if at MAXIV): git clone https://gitlab.maxiv.lu.se/ext-shunyu/general-saxs-data-processing-gui.git
-                (if NOT at MAXIV): https://github.com/MaxIV-KitsControls/RAGui.git
+                (if NOT at MAXIV): git clone https://github.com/MaxIV-KitsControls/RAGui.git
                 NOTE: for username and pw ask the cosaxs staff
         step 3: wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
         step 4: bash ./Miniconda3-latest-Linux-x86_64.sh
