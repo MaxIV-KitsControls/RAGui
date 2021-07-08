@@ -24,7 +24,7 @@ For WINDOWS users:
 
 To get RAGui running on your windows 10 computer the easiest way is to use the ubuntu version of wsl.
 Wsl is a basically a contained linux vitrual OS officially supported by windows.
-You will also need an Xviewer, we recommend Xming but 
+You will also need an Xviewer, we recommend Xming
 
     Installing Xming:
         step 1: Google Xming, download and install the Xming X Server for windows
