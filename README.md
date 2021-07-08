@@ -2,30 +2,29 @@
 
 This GUI is constructed based on silx library developed at ESRF
 
-Notes on starating the GUI (RAGui uses the PyQtFAI_env):
-Method 1:
-    Type in terminal: "RAGui"
+Notes on starating the GUI using a terminal if already installed in folder RAGui:
 
-Method 2:
-    conda activate PyQtFAI_env_38_v3
+    conda activate RAGUI_env
     cd RAGui
     python RAGui.py
 
 
+For Linux users:
+
 Minimal environment install for linux based operating systems using miniconda 3 with python 3.8:
-    source COSAXS/miniconda3/bin/activate
-    conda create -n RAGUI_env python=3.8
-    conda install pyfai
-    conda install pyqt
-    conda install dask
-    conda install bitshuffle
+
+    step 1: wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    step 2: bash ./Miniconda3-latest-Linux-x86_64.sh
+    step 3: conda create -n RAGUI_env python=3.8 pyfai pyqt dask bitshuffle
+    step 4: conda activate RAGUI_env
+    step 5: python RAGUI_env/RAGui.py   
     
 
-Getting started with WINDOWS:
-    Hi windows(10) user.
-        To get RAGui running on your windows 10 computer the easiest way is to use the ubuntu version of wsl.
-        Wsl is a basically a contained linux vitrual OS officially supported by windows.
-        You will also need an Xviewer, we recommend VcXsrv
+For WINDOWS users:
+
+To get RAGui running on your windows 10 computer the easiest way is to use the ubuntu version of wsl.
+Wsl is a basically a contained linux vitrual OS officially supported by windows.
+You will also need an Xviewer, we recommend Xming but 
 
     Installing Xming:
         step 1: Google Xming, download and install the Xming X Server for windows
@@ -52,9 +51,9 @@ Getting started with WINDOWS:
                 NOTE: for username and pw ask the cosaxs staff
         step 3: wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
         step 4: bash ./Miniconda3-latest-Linux-x86_64.sh
-        step 5: conda env create -f general-saxs-data-processing-gui/RAGui_env.yml
-        step 6: source Miniconda/bin/activate RAGui_env
-        step 7: python general-saxs-data-processing-gui/RAGui.py
+        step 5: conda env create -f RAGui/RAGui_env.yml
+        step 6: cond activate RAGui_env
+        step 7: python RAGui/RAGui.py
 
 
         NOTE: when you want to get your data into the analysis: click on "Browser", and you will find your data by clicking on the "Computer" icon, then the "hard drive icon" named "/". The go to mnt/c/Users/"username"/"your usb or external harddrive or werever you have your data" 
