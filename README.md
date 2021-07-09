@@ -20,15 +20,16 @@ Minimal environment install for linux based operating systems using miniconda 3 
     step 5: python RAGUI_env/RAGui.py   
     
 
-For WINDOWS users:
+For WINDOWS (10+) users:
 
-To get RAGui running on your windows 10 computer the easiest way is to use the ubuntu version of wsl.
+To get RAGui running on your windows computer the easiest way is to use the ubuntu version of wsl.
 Wsl is a basically a contained linux vitrual OS officially supported by windows.
 You will also need an Xviewer, we recommend Xming
 
     Installing Xming:
         step 1: Google Xming, download and install the Xming X Server for windows
         step 2: Start XLaunch and just press the next button
+            NOTE: remember to launch your Xviewer everytime you want to run RAGui
             NOTE: On the fourth pannel (Finish configuration) you can save the configuration so its starts on startup (it is a very light application) 
 
     Installing WSL Ubuntu:
@@ -46,14 +47,16 @@ You will also need an Xviewer, we recommend Xming
 
         step 0: Start your Ubuntu, set a username and password
         step 1: sudo bash -c ' apt update -y && apt full-upgrade -y && apt-get install git libxkbcommon-x11-0 -y && export DISPLAY=localhost:0.0' 
-        step 2: (if at MAXIV): git clone https://gitlab.maxiv.lu.se/ext-shunyu/general-saxs-data-processing-gui.git
+        step 2: echo -e "export DISPLAY=localhost:0.0\nexport PATH=\"\$HOME/miniconda3/bin/:\$PATH\"\n$(cat .bashrc)" >.bashrc
+        step 3: (if at MAXIV): git clone https://gitlab.maxiv.lu.se/ext-shunyu/general-saxs-data-processing-gui.git
                 (if NOT at MAXIV): git clone https://github.com/MaxIV-KitsControls/RAGui.git
                 NOTE: for username and pw ask the cosaxs staff
-        step 3: wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-        step 4: bash ./Miniconda3-latest-Linux-x86_64.sh
-        step 5: conda env create -f RAGui/RAGui_env.yml
-        step 6: cond activate RAGui_env
-        step 7: python RAGui/RAGui.py
+        step 4: wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        step 5: bash ./Miniconda3-latest-Linux-x86_64.sh
+        step 6: conda env create -f RAGui/RAGui_env.yml
+        step 7: cond activate RAGui_env
+        step 8: cd RAGui
+        step 9: python RAGui.py
 
 
         NOTE: when you want to get your data into the analysis: click on "Browser", and you will find your data by clicking on the "Computer" icon, then the "hard drive icon" named "/". The go to mnt/c/Users/"username"/"your usb or external harddrive or werever you have your data" 
