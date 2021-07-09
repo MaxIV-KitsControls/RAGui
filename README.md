@@ -43,7 +43,7 @@ You will also need an Xviewer, we recommend Xming
                 There will be two progess bars appearing in step 1 so be patient   
             NOTE: For step 3 you will be asked to aprove license terms, type "yes" and press enter. Press enter when prompted to confirm location and when asked to append location to PATH.
                 When asked if you want visual studio code type "no" and press enter
-            NOTE: The next time you want to start PyQtFAI just do steps 0, 6 and 7
+            NOTE: The next time you want to start PyQtFAI just do steps 0, 7, 8 and 9
 
         step 0: Start your Ubuntu, set a username and password
         step 1: sudo bash -c ' apt update -y && apt full-upgrade -y && apt-get install git libxkbcommon-x11-0 -y && export DISPLAY=localhost:0.0' 
@@ -53,9 +53,11 @@ You will also need an Xviewer, we recommend Xming
                 NOTE: for username and pw ask the cosaxs staff
         step 4: wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
         step 5: bash ./Miniconda3-latest-Linux-x86_64.sh
-        step 6: conda env create -f RAGui/RAGui_env.yml
-        step 7: cond activate RAGui_env
-        step 8: cd RAGui
+        step 6: (if downloaded from MAXIV): conda env create -f general-saxs-data-processing-gui/RAGui_env.yml
+                (if NOT downloaded at MAXIV): conda env create -f RAGui/RAGui_env.yml
+        step 7: conda activate RAGui_env
+        step 8: (if downloaded from MAXIV):
+                (if NOT downloaded at MAXIV) cd general-saxs-data-processing-gui
         step 9: python RAGui.py
 
 
