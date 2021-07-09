@@ -8,3 +8,4 @@ dependencies:
   - pyqt=5.12.3
   - bitshuffle=0.3.5
   - hdf5plugin
+  - pyside2
