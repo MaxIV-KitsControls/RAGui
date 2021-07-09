@@ -56,8 +56,8 @@ You will also need an Xviewer, we recommend Xming
         step 6: (if downloaded from MAXIV): conda env create -f general-saxs-data-processing-gui/RAGui_env.yml
                 (if NOT downloaded at MAXIV): conda env create -f RAGui/RAGui_env.yml
         step 7: conda activate RAGui_env
-        step 8: (if downloaded from MAXIV):
-                (if NOT downloaded at MAXIV) cd general-saxs-data-processing-gui
+        step 8: (if downloaded from MAXIV): cd general-saxs-data-processing-gui
+                (if NOT downloaded at MAXIV): cd RAGui
         step 9: python RAGui.py
 
 
