@@ -1,0 +1,1 @@
+{"saxs_det": "entry/data/data", "saxs_master": "", "waxs_det": "entry/data/data", "waxs_master": "", "I_0": "entry/measurement/albaem-02_ti", "I_t": "entry/instrument/adlink_ch0/i_t", "dt": "entry/measurement/count_time", "Motor_x": "", "Motor_y": "entry/measurement/sams1_y", "Motor_z": "", "Rot": "", "T": ""}

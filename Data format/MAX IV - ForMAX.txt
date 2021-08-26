@@ -1,0 +1,12 @@
+{"saxs_det":"entry/data/data",
+"saxs_master": "This is ForMAX data",	
+"waxs_det":"entry/data/data",
+"waxs_master":"",
+"I_0":"entry/measurement/albaem02_ch2",
+"I_t":"entry/measurement/adlink_ch0",
+"dt":"",
+"Motor_x":"",	
+"Motor_y":"",	
+"Motor_z":"",	
+"Rot":"",	
+"T":""}
