@@ -71,6 +71,7 @@ class ArrayCurvePlot(qt.QWidget):
         self.__x_axis_errors = None
         self.__values = None
         self.__old_plotmode = None
+        self.__waterfallfactor = 1
 
         self._plot = Plot1D()
 
@@ -129,22 +130,27 @@ class ArrayCurvePlot(qt.QWidget):
         
 
         if self.__selector_is_connected:
-            self._selector.selectionChanged.disconnect(self._updateCurve)
+            try:
+                self._selector.selectionChanged.disconnect(self._updateCurve)
+            except:
+                self._selector.selectionChanged.disconnect(self._updatewaterfall)
             self.__selector_is_connected = False
         #self._selector.setSelection([])
         #if self.__plotmode != 3:
         if self.aziselector == None :
-            if ys.ndim == 2:
+            if ys.ndim == 1:
+                self._selector.setData(ys)
+            elif ys.ndim == 2:
                 self._selector.setData(ys[slice(0, None, 1), slice(None,None,None)])
                 #self._selector.setAxisNames(["Y"])
             else:
                 self._selector.setData(ys[slice(0, None, 1), slice(0, None, 1), slice(None,None,None)])
-                self._selector.setAxisNames(["Y"])
+                #self._selector.setAxisNames(["Y"])
         else:
             #ys = numpy.moveaxis(ys, -1, 1)
             ys = numpy.sum(ys[:,self.aziselector[0]:self.aziselector[1],:], axis=1)
             self._selector.setData(ys)
-            self._selector.setAxisNames(["Y"])
+            #self._selector.setAxisNames(["Y"])
         #self._selector.setSelection([(slice(0, -1, 1), slice(0,-1,1), slice(None))])
         if self._selector.data() is not None:
             print("Data is assigned")
@@ -199,23 +205,12 @@ class ArrayCurvePlot(qt.QWidget):
             self.__old_plotmode = 2
         #print(self.__old_plotmode)
 
-    def _updatewaterfall(self, ys, x=None,
+    def Setwaterfall(self, ys, x=None,
                       yerror=None, xerror=None,
                       ylabels=None, xlabel=None, title=None,
                       xscale=None, yscale=None, legend=None, selector = None, qselector = None, aziselector=None, factor = 1, plotmode=3):
         self._plot.remove(kind="curve")
         #print(self.__old_plotmode)
-        if aziselector is None:
-            if ys.ndim == 2:
-                self.__signals = ys[slice(selector[0], selector[1], selector[2]),:]
-            else:
-                if qselector is None:
-                    self.__signals = numpy.sum(ys[slice(selector[0], selector[1], selector[2]), :, :], axis = 1)
-                else:
-                    self.__signals = numpy.sum(ys[slice(selector[0], selector[1], selector[2]), qselector[0]:qselector[1], :], axis = 1)
-        else:
-            self.__signals = numpy.sum(ys[slice(selector[0], selector[1], selector[2]), aziselector[0]:aziselector[1], :], axis=1)
-        #print(ys.shape)
         self.__signals_names = ylabels or (["Y"] * len(ys))
         self.__signal_errors = yerror
         self.__axis = x
@@ -224,25 +219,66 @@ class ArrayCurvePlot(qt.QWidget):
         self.__title = title
         self.__legend = legend
         self.__plotmode = plotmode
-        #data = self._selector.selectedData()
-        #selection = self._selector.selection()
-        #print(selection)
-        self.__legend=legend
-        self._selector.clear()
+        self.__waterfallfactor = factor
+        self.arrayselector = selector
+
+        if self.__selector_is_connected:
+            try:
+                self._selector.selectionChanged.disconnect(self._updateCurve)
+            except:
+                self._selector.selectionChanged.disconnect(self._updatewaterfall)
+            self.__selector_is_connected = False
+
+       
+        if aziselector is None:
+            if ys.ndim == 2:
+                self.__signals = ys[slice(selector[0], selector[1], selector[2]),:]
+            else:
+                if qselector is None:
+                    self.__signals = ys[...,slice(selector[0], selector[1], selector[2]), :]
+
+                else:
+                    self.__signals = numpy.sum(ys[...,slice(selector[0], selector[1], selector[2]), qselector[0]:qselector[1], :], axis = -2)
+
+        else:
+            self.__signals = numpy.sum(ys[..., slice(selector[0], selector[1], selector[2]), aziselector[0]:aziselector[1], :], axis= -2)
+
+        ind = numpy.indices(self.__signals.shape[:-2])
+
+        self._selector.setData(ind)
+
+        if len(self.__signals.shape) <= 2:
+            self._selector.hide()
+        else:
+            self._selector.show()
+
+        self._updatewaterfall()
+                
+        if not self.__selector_is_connected:
+            self._selector.selectionChanged.connect(self._updatewaterfall)
+            self.__selector_is_connected = True
         
-        if plotmode == 3:
+        #self._selector.clear()
+    def _updatewaterfall(self):
+        selection = self._selector.selection()
+
+
+        if self.__plotmode == 3:
             sequence = 0
-            for curve in self.__signals:
-                self._plot.addCurve(self.__axis, curve*factor**sequence, legend=self.__legend+'_'+str(selector[0]+sequence*selector[2]))
+            for curve in self.__signals[selection]:
+            #for curve in images:
+                self._plot.addCurve(self.__axis, curve*self.__waterfallfactor**sequence, legend=self.__legend+'_'+str(self.arrayselector[0]+sequence*self.arrayselector[2]))
                 sequence += 1
             self.__old_plotmode = 3
         
-        if plotmode == 4:
+        if self.__plotmode == 4:
             sequence = 0
-            for curve in self.__signals:
-                self._plot.addCurve(self.__axis, curve+factor*sequence, legend=self.__legend+'_'+str(selector[0]+sequence*selector[2]))
+            for curve in self.__signals[selection]:
+            #for curve in images:
+                self._plot.addCurve(self.__axis, curve+self.__waterfallfactor*sequence, legend=self.__legend+'_'+str(self.arrayselector[0]+sequence*self.arrayselector[2]))
                 sequence += 1
             self.__old_plotmode = 4
+
         #selection = self._selector.selection()
         #s = self._selector.selectedData()
         #print(selection)
@@ -406,12 +442,13 @@ class ArrayImagePlot(qt.QWidget):
         else:
             self._selector.show()
 
-        self._auxSigSlider.setMaximum(len(signals) - 1)
+        self._auxSigSlider.setMaximum(len(signals)-1)
         if len(signals) > 1:
             self._auxSigSlider.show()
+            self._auxSigSlider.setValue(1)
         else:
             self._auxSigSlider.hide()
-        self._auxSigSlider.setValue(0)
+            self._auxSigSlider.setValue(0)
 
         self._axis_scales = xscale, yscale
         self._updateImage()
