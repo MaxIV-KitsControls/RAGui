@@ -36,6 +36,7 @@ from silx.gui.widgets.ThreadPoolPushButton import ThreadPoolPushButton
 from silx.gui.hdf5.Hdf5TreeModel import Hdf5TreeModel
 from silx.io.nxdata import save_NXdata
 
+
 class RAGui(qt.QMainWindow):
     def __init__(self, filenames=None):
         qt.QMainWindow.__init__(self)
@@ -48,13 +49,19 @@ class RAGui(qt.QMainWindow):
         viewMenu = mainmenu.addMenu('&Setting')
 
         set_path = qt.QAction('Saving Path', self)
+        set_path.setShortcut("Ctrl+S")
         set_path.triggered.connect(self.path_set)
         viewMenu.addAction(set_path)
 
         pyFAI_cali = qt.QAction('Calibration', self)
+        pyFAI_cali.setShortcut("Ctrl+C")
         pyFAI_cali.triggered.connect(self.cali_trigger)
         viewMenu.addAction(pyFAI_cali)
-        
+        '''
+        Dataformat = qt.QAction('Data Format', self)
+        Dataformat.triggered.connect(self.Data_format)
+        viewMenu.addAction(Dataformat)
+        '''
         helpMenu = mainmenu.addMenu('&Help')
         help_wiki = qt.QAction('Help wiki', self)
         help_wiki.triggered.connect(self.wiki_open)
@@ -74,16 +81,23 @@ class RAGui(qt.QMainWindow):
         fileMenu.addAction(open_file)
         fileMenu.addAction(exitAct)
 
-        #self.InitWindow()
+        #mainpanel = qt.QWidget()
+        #mainlayout = qt.QVBoxLayout()
+        #mainpanel.setLayout(mainlayout)
 
+        #filestructure = D_format()
+        #mainlayout.addWidget(filestructure)
 
-    #def InitWindow(self):
         Tabmenu = qt.QTabWidget()
         Tabmenu.setTabPosition(2)
         Tabmenu.setStyleSheet(
             "QTabWidget::pane {border-top: 2px solid #C2C7CB;}"
             "QTabWidget::tab  {border: 2px; border-top-left-radius: 5px; border-bottom-left-radius: 5px; font: Arial}"
             "QTabBar::tab:selected {background-color: #4169E1; color:#ffffff;}")
+        
+        #mainlayout.addWidget(Tabmenu)
+        #self.setLayout=mainlayout
+        
         self.setCentralWidget(Tabmenu)
         #self.tab_red = Reduction.Reduction()
         self.tab_red = Reduction_modified.Reduction()
@@ -115,6 +129,9 @@ class RAGui(qt.QMainWindow):
         self.p = qt.QProcess()  # Keep a reference to the QProcess (e.g. on self) while it's running.
         #self.p.start("python3", ['dummy_script.py'])
         self.p.start("pyfai-calib2")
+    
+    def Data_format(self):
+        pass
     
     def wiki_open(self):
         self.wiki = qt.QDesktopServices()

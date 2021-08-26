@@ -1,0 +1,1 @@
+{"saxs_det": "entry/data/data", "saxs_master": "", "waxs_det": "entry/data/data", "waxs_master": "entry/data/data_000001", "I_0": "", "I_t": "", "dt": "", "Motor_x": "", "Motor_y": "", "Motor_z": "", "Rot": "", "T": ""}
