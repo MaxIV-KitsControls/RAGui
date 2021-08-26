@@ -1,0 +1,8 @@
+Update log:
+V 4.0.0
+The latest update with new functions:
+- open to user-defined data structure
+- save 1D/2D spectra
+- select SAXS/WAXS data for reduction
+fixed issues:
+- plot 1D data not working
