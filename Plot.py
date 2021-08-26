@@ -45,6 +45,7 @@ from silx.io.nxdata import save_NXdata
 from silx.gui.fit import FitWidget
 from silx.gui.hdf5 import Hdf5TreeView
 from silx.gui.widgets.TableWidget import TableWidget
+from silx.io.utils import save1D
   
 '''
 class plot_panel(qt.QWidget):
@@ -124,6 +125,10 @@ class Plot(qt.QWidget):
         self.clearview.setIcon(icons.getQIcon('close'))
         self.clearview.clicked.connect(self.clear_view)
         self.file_layout.layout().addWidget(self.clearview)
+        self.savefile = qt.QPushButton("Save As")
+        self.savefile.setIcon(icons.getQIcon('document-save'))
+        self.savefile.clicked.connect(self.save_file)
+        self.file_layout.layout().addWidget(self.savefile)
         
 
         dataplotpara = qt.QGroupBox("Plotting selection")
@@ -279,110 +284,134 @@ class Plot(qt.QWidget):
                 print("1D panel is active")
                 title = os.path.basename(selected[0].local_filename[:-3])
                 
-                data = numpy.array(selected[0])
+                data = selected[0].h5py_object
                 #print(q_1d)
                 #print(data.shape[1])
                 # data is a hdf5.H5Node object
                 # data.h5py_object is a Group/Dataset object (from h5py, spech5, fabioh5)
                 # The dataviewer can display both
 
+                head_tail = os.path.split(selected[0].data_url.data_path())
+                print(head_tail[0])
+
                 try:
-                    q_1d = selected[0].local_file['entry/data/1D_data/q'][:]
+                    q_1d = selected[0].local_file[head_tail[0]+'/q'][:]
                 except:
-                    q_1d = selected[0].local_file['entry/scale/q_1d'][:]
+                    q_1d = selected[0].local_file[head_tail[0]+'/q_1d'][:]
                 try:
-                    azi_1d = selected[0].local_file['entry/scale/Azimuthal'][:]
+                    azi_1d = selected[0].local_file[head_tail[0]+'/Azimuthal'][:]
+                    azi_index_start = (numpy.abs(float(self.azi_start.text())-azi_1d)).argmin()
+                    azi_index_stop = (numpy.abs(float(self.azi_stop.text())-azi_1d)).argmin()
+                    self.qselector = (azi_index_start, azi_index_stop)
                 except:
-                    azi_1d = selected[0].local_file['entry/data/2D_data/Azimuthal'][:]
-                
+                    self.qselector = None
+                    print("Azimuthal is found found! Pass!")
+                    pass
+                    #azi_1d = selected[0].local_file[head_tail[0]+'/Azimuthal'][:]
                 
                 q_index_low = (numpy.abs(float(self.q_low.text())-q_1d)).argmin()
                 q_index_high = (numpy.abs(float(self.q_high.text())-q_1d)).argmin()
-                azi_index_start = (numpy.abs(float(self.azi_start.text())-azi_1d)).argmin()
-                azi_index_stop = (numpy.abs(float(self.azi_stop.text())-azi_1d)).argmin()
                 
-
-                if self.q_plot.isChecked():
-                    #data = selected[0]
-                    data = numpy.array(selected[0])
-                    #if data.ndim == 2:
-                    #    data = data.reshape(data.shape[0], 1, data.shape[1])
-                
-                    if self.sin_plot.isChecked():
-                        print("single plot is checked")
-                        self.plotpanel.setCurvesData(data, x=q_1d, xlabel=r"q ($nm^{-1}$)", title=title, legend="data", plotmode=1)
-                    elif self.mult_plot.isChecked():
-                        print("multiple plot is checked") 
-                        self.plotpanel.setCurvesData(data, x=q_1d, xlabel=r"q ($nm^{-1}$)", title=title, legend=title, plotmode=2)
-                    elif self.waterfall_plot.isChecked():
-                        print("waterfall plot is checked") 
-                        self.selector = (int(self.seq_start.text()), int(self.seq_end.text())+1, int(self.seq_step.text()))
-                        self.qselector = (azi_index_start, azi_index_stop)
-                        if data.ndim == 2:
-                            self.plotpanel._updatewaterfall(data, x=q_1d, xlabel="q ($nm^{-1}$)", title=title, legend=title, 
-                                                        selector=self.selector, factor=float(self.seq_factor.text()), plotmode=3)
-                        else:
-                            self.plotpanel._updatewaterfall(data, x=q_1d, xlabel="q ($nm^{-1}$)", title=title, legend=title, 
-                                                        selector=self.selector, qselector=self.qselector, factor=float(self.seq_factor.text()), plotmode=3)
-                    elif self.waterfall_linear.isChecked():
-                        print("waterfall plot is checked") 
-                        self.selector = (int(self.seq_start.text()), int(self.seq_end.text())+1, int(self.seq_step.text()))
-                        self.qselector = (azi_index_start, azi_index_stop)
-                        if data.ndim == 2: 
-                            self.plotpanel._updatewaterfall(data, x=q_1d, xlabel="q ($nm^{-1}$)", title=title, legend=title, 
-                                                        selector=self.selector, factor=float(self.seq_factor.text()), plotmode=4)
-                        else:
-                            self.plotpanel._updatewaterfall(data, x=q_1d, xlabel="q ($nm^{-1}$)", title=title, legend=title, 
-                                                        selector=self.selector, qselector=self.qselector, factor=float(self.seq_factor.text()), plotmode=4)
-                elif self.azi_plot.isChecked():
-                    data = numpy.moveaxis(numpy.array(selected[0]), -1, 1)
-                    try:
-                        azi_1d = selected[0].local_file['entry/scale/Azimuthal']
-                    except:
-                        azi_1d = selected[0].local_file['entry/data/2D_data/Azimuthal'][:]
-                    if self.sin_plot.isChecked():
-                        print("single plot is checked")
-                        self.aziselector = (q_index_low, q_index_high)
-                        self.plotpanel.setCurvesData(data, x=azi_1d, xlabel=r"Azimuthal", aziselector=self.aziselector, title=title, legend="data", plotmode=1)
-                    elif self.mult_plot.isChecked():
-                        print("multiple plot is checked") 
-                        self.aziselector = (q_index_low, q_index_high)
-                        self.plotpanel.setCurvesData(data, x=azi_1d, xlabel=r"Azimuthal", aziselector=self.aziselector, title=title, legend=title, plotmode=2)
-                    elif self.waterfall_plot.isChecked():
-                        print("waterfall plot is checked") 
-                        self.selector = (int(self.seq_start.text()), int(self.seq_end.text())+1, int(self.seq_step.text()))
-                        self.aziselector = (q_index_low, q_index_high)
-                        self.plotpanel._updatewaterfall(data, x=azi_1d, xlabel=r"Azimuthal", title=title, legend=title, 
-                                                        selector=self.selector, aziselector=self.aziselector, factor=float(self.seq_factor.text()), plotmode=3)
-                    elif self.waterfall_linear.isChecked():
-                        print("waterfall plot is checked") 
-                        self.selector = (int(self.seq_start.text()), int(self.seq_end.text())+1, int(self.seq_step.text()))
-                        self.aziselector = (q_index_low, q_index_high)
-                        self.plotpanel._updatewaterfall(data, x=azi_1d, xlabel=r"Azimuthal", title=title, legend=title, 
-                                                        selector=self.selector, aziselector=self.aziselector, factor=float(self.seq_factor.text()), plotmode=4)                           
+                if data.ndim ==1:
+                    self.plotpanel.setCurvesData(data, x=data, xlabel=r"axis", title=title, legend="data", plotmode=1)
+                else:
+                    if self.q_plot.isChecked():
+                        #data = selected[0]
+                        #data = numpy.array(selected[0])
+                        #if data.ndim == 2:
+                        #    data = data.reshape(data.shape[0], 1, data.shape[1])
+                    
+                        if self.sin_plot.isChecked():
+                            print("single plot is checked")
+                            self.plotpanel.setCurvesData(data, x=q_1d, xlabel=r"q ($nm^{-1}$)", title=title, legend="data", plotmode=1)
+                        elif self.mult_plot.isChecked():
+                            print("multiple plot is checked") 
+                            self.plotpanel.setCurvesData(data, x=q_1d, xlabel=r"q ($nm^{-1}$)", title=title, legend=title, plotmode=2)
+                        elif self.waterfall_plot.isChecked():
+                            print("waterfall plot is checked") 
+                            self.selector = (int(self.seq_start.text()), int(self.seq_end.text())+1, int(self.seq_step.text()))
+                            #self.qselector = (azi_index_start, azi_index_stop)
+                            if data.ndim == 2:
+                                self.plotpanel.Setwaterfall(data, x=q_1d, xlabel="q ($nm^{-1}$)", title=title, legend=title, 
+                                                            selector=self.selector, factor=float(self.seq_factor.text()), plotmode=3)
+                            else:
+                                self.plotpanel.Setwaterfall(data, x=q_1d, xlabel="q ($nm^{-1}$)", title=title, legend=title, 
+                                                            selector=self.selector, qselector=self.qselector, factor=float(self.seq_factor.text()), plotmode=3)
+                        elif self.waterfall_linear.isChecked():
+                            print("waterfall plot is checked") 
+                            self.selector = (int(self.seq_start.text()), int(self.seq_end.text())+1, int(self.seq_step.text()))
+                            #self.qselector = (azi_index_start, azi_index_stop)
+                            if data.ndim == 2: 
+                                self.plotpanel.Setwaterfall(data, x=q_1d, xlabel="q ($nm^{-1}$)", title=title, legend=title, 
+                                                            selector=self.selector, factor=float(self.seq_factor.text()), plotmode=4)
+                            else:
+                                self.plotpanel.Setwaterfall(data, x=q_1d, xlabel="q ($nm^{-1}$)", title=title, legend=title, 
+                                                            selector=self.selector, qselector=self.qselector, factor=float(self.seq_factor.text()), plotmode=4)
+                    elif self.azi_plot.isChecked():
+                        data = numpy.moveaxis(numpy.array(selected[0]), -1, 1)
+                        try:
+                            #azi_1d = selected[0].local_file['entry/scale/Azimuthal']
+                            azi_1d = selected[0].local_file[head_tail[0]+'/Azimuthal']
+                        except:
+                            #azi_1d = selected[0].local_file['entry/data/2D_data/Azimuthal'][:]
+                            azi_1d = len(data)
+                        if self.sin_plot.isChecked():
+                            print("single plot is checked")
+                            self.aziselector = (q_index_low, q_index_high)
+                            self.plotpanel.setCurvesData(data, x=azi_1d, xlabel=r"Azimuthal", aziselector=self.aziselector, title=title, legend="data", plotmode=1)
+                        elif self.mult_plot.isChecked():
+                            print("multiple plot is checked") 
+                            self.aziselector = (q_index_low, q_index_high)
+                            self.plotpanel.setCurvesData(data, x=azi_1d, xlabel=r"Azimuthal", aziselector=self.aziselector, title=title, legend=title, plotmode=2)
+                        elif self.waterfall_plot.isChecked():
+                            print("waterfall plot is checked") 
+                            self.selector = (int(self.seq_start.text()), int(self.seq_end.text())+1, int(self.seq_step.text()))
+                            self.aziselector = (q_index_low, q_index_high)
+                            self.plotpanel.Setwaterfall(data, x=azi_1d, xlabel=r"Azimuthal", title=title, legend=title, 
+                                                            selector=self.selector, aziselector=self.aziselector, factor=float(self.seq_factor.text()), plotmode=3)
+                        elif self.waterfall_linear.isChecked():
+                            print("waterfall plot is checked") 
+                            self.selector = (int(self.seq_start.text()), int(self.seq_end.text())+1, int(self.seq_step.text()))
+                            self.aziselector = (q_index_low, q_index_high)
+                            self.plotpanel.Setwaterfall(data, x=azi_1d, xlabel=r"Azimuthal", title=title, legend=title, 
+                                                            selector=self.selector, aziselector=self.aziselector, factor=float(self.seq_factor.text()), plotmode=4)                           
             else:
                 print("2D panel is active")  
                 
+                head_tail = os.path.split(selected[0].data_url.data_path())
+                print(head_tail[0])
+
                 try:
-                    q_1d = selected[0].local_file['entry/data/1D_data/q'][:]
+                    q_1d = selected[0].local_file[head_tail[0]+'/q'][:]
                 except:
-                    q_1d = selected[0].local_file['entry/scale/q_1d'][:]
+                    q_1d = selected[0].local_file[head_tail[0]+'/q_1d'][:]
                 
                 try:
-                    azi_angle = selected[0].local_file['entry/data/2D_data/Azimuthal'][:]
+                    azi_angle = selected[0].local_file[head_tail[0]+'/Azimuthal'][:]
                 except:
+                    azi_angle = []
                     print("azi_angle is not found")
                     pass
                 
                 title = os.path.basename(selected[0].local_filename[:-3])
                 
-                data = numpy.array(selected[0])
+                data = selected[0].h5py_object
 
-                if data.ndim == 2:
-                    data = data.reshape((1, data.shape[0], data.shape[1]))
-                    self.plotpanel2d.setImageData(data, x_axis=q_1d, y_axis=None, signals_names=["Dynamics"], xlabel="q ($nm^{-1}$)", ylabel="Frame Number")
-                elif data.ndim ==3:
-                    self.plotpanel2d.setImageData(data, x_axis=q_1d, y_axis=azi_angle, signals_names=range(len(data)), xlabel="q ($nm^{-1}$)", ylabel="Azimuthal angle")
+                if azi_angle == []:
+                    if data.ndim == 2:
+                        data = numpy.array(data)
+                        data = data.reshape((1, data.shape[0], data.shape[1]))
+                        self.plotpanel2d.setImageData(data, x_axis=q_1d, y_axis=None, signals_names=["Dynamics"], xlabel="q ($nm^{-1}$)", ylabel="Frame Number")
+                    elif data.ndim >= 3:
+                        #data = data.reshape((1, data.shape[0], data.shape[1]))
+                        self.plotpanel2d.setImageData(data, x_axis=q_1d, y_axis=None, signals_names=range(len(data)), xlabel="q ($nm^{-1}$)", ylabel="Frame Number")
+                else:
+                    if data.ndim == 2:
+                        data = numpy.array(data)
+                        data = data.reshape((1, data.shape[0], data.shape[1]))
+                        self.plotpanel2d.setImageData(data, x_axis=q_1d, y_axis=azi_angle, signals_names=["Dynamics"], xlabel="q ($nm^{-1}$)", ylabel="Frame Number")
+                    elif data.ndim >=3:
+                        self.plotpanel2d.setImageData(data, x_axis=q_1d, y_axis=azi_angle, signals_names=range(len(data)), xlabel="q ($nm^{-1}$)", ylabel="Azimuthal angle")
                   
             #self.__dataViewer2.addImage(data)
         #else:
@@ -409,7 +438,54 @@ class Plot(qt.QWidget):
         for files in glob.glob(path, recursive=True):
             self.databrowser.findHdf5TreeModel().appendFile(files)
         
-    
+    def save_file(self):
+        
+        selected = list(self.databrowser.selectedH5Nodes())
+
+        if len(selected) == 1:
+            try:
+                head_tail = os.path.split(selected[0].data_url.data_path())
+                print(head_tail[0])
+
+                data = selected[0].h5py_object
+
+                try:
+                    q_1d = selected[0].local_file[head_tail[0]+'/q'][:]
+                    print("q_1d found")
+                except:
+                    q_1d = numpy.arange(data.shape[-1])
+                    print("q_1d assgined")
+                try:
+                    azi_angle = selected[0].local_file[head_tail[0]+'/Azimuthal'][:]
+                    print("azi_angle found")
+                except:
+                    azi_angle = numpy.arange(data.shape[-2])
+                    print("azi_angle assgined")
+
+                name = qt.QFileDialog.getSaveFileName(self, 'Save As', self.__savingpath, "txt files (*.txt)")
+                #print(obj.h5py_object)
+
+                if name != ('', ''):
+                    print(name[0])
+                    if data.ndim <= 2:
+                        print(data.ndim)
+                        save1D(name[0], q_1d, data, xlabel="q", comments="#{}".format(azi_angle), header="Data exported from {}\n".format(selected[0].local_filename))
+                        print("file is saved as {}".format(name[0]))
+                    else:
+                        print("{} is larger than 2".format(data.ndim))
+                        ind = numpy.indices(data.shape[:-2])
+                        ind_list = numpy.ravel_multi_index(ind, data.shape[:-2])
+                        #for counter, subdata in data[...,:,:,:]:
+                        for frame, counter in numpy.ndenumerate(ind_list):
+                            subname = os.path.splitext(name[0])[0] + "_{}.txt".format(counter)
+                            save1D(subname, q_1d, data[frame], xlabel="q", comments="#{}".format(azi_angle), header="Data frame at {}\nexported from {}\n".format(frame, selected[0].local_filename))
+                            print("file is saved as {}".format(subname))
+            except:
+                print("file is not saved!")
+
+
+
+
     def delete_file(self, selectedObjects):
         #selectedObjects = event.source().selectedH5Nodes()
         #menu = event.menu()
