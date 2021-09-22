@@ -21,7 +21,7 @@ import silx
 import glob
 import re
 from Dataformat import D_format
-from tqdm import tqdm
+#from tqdm import tqdm
 #from pathlib import Path, PureWindowsPath
 #from pyFAI.app import calib2
 
