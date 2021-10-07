@@ -162,7 +162,7 @@ class ArrayCurvePlot(qt.QWidget):
         #if len(ys[0].shape) < 3:
         #    self._selector.hide()
         #else:
-        #    self._selector.show()
+        self._selector.show()
 
         self._plot.setGraphTitle(title or "")
         if xscale is not None:
