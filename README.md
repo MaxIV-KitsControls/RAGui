@@ -21,7 +21,16 @@ Minimal environment install for linux based operating systems using miniconda 3 
     
 
 For WINDOWS (10+) users:
+It is possible to run RAGui in Anaconda envrionment directly under Windows system:
+    step 1: download Anaconda and follow the instruction at https://www.anaconda.com/products/individual
+    step 2: open "Anaconda Prompt" from Start
+    step 3: type in "conda create -n RAGUI_env python=3.8 pyfai pyqt dask hdf5plugin silx tqdm"
+    step 4: conda activate RAGUI_env
+    step 5: cd "...(path where you unzipped RAGui folder).."
+    step 6: python RAGui.py   
 
+
+One additional option (if you prefer wsl environment):
 To get RAGui running on your windows computer the easiest way is to use the ubuntu version of wsl.
 Wsl is a basically a contained linux vitrual OS officially supported by windows.
 You will also need an Xviewer, we recommend Xming
