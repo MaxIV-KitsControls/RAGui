@@ -24,6 +24,8 @@ For WINDOWS (10+) users:
 
 It is possible to run RAGui in Anaconda envrionment directly under Windows system:
 
+first down the zipped RAGui and unzip it in the directory path which you have the rights to access. Then follow the steps below to setup the working envrionment
+
     step 1: download Anaconda and follow the instruction at https://www.anaconda.com/products/individual
     step 2: open "Anaconda Prompt" from Start
     step 3: type in "conda create -n RAGUI_env python=3.8 pyfai pyqt dask hdf5plugin silx tqdm"
